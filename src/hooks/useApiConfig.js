@@ -38,8 +38,13 @@ const setStored = (key, value) => {
 export const useApiConfig = () => {
   const apiKey = ref(getStored(STORAGE_KEYS.API_KEY))
   const baseUrl = ref(getStored(STORAGE_KEYS.BASE_URL, DEFAULT_API_BASE_URL))
-  
+
   const isConfigured = computed(() => !!apiKey.value)
+
+  // Initialize base URL immediately | 立即初始化 Base URL
+  if (baseUrl.value) {
+    setRequestBaseUrl(baseUrl.value)
+  }
 
   // Watch and sync changes | 监听并同步变化
   watch(apiKey, (newKey) => {

@@ -133,27 +133,73 @@ export const useImageGeneration = () => {
 
     try {
       const modelConfig = getModelByName(params.model)
-      
-      // Build request data | 构建请求数据
+
+      // Check if model uses Chat API | 检查是否使用 Chat API
+      if (modelConfig?.useChatApi) {
+        // Build Chat API request | 构建 Chat API 请求
+        const content = [{ type: 'text', text: params.prompt }]
+        if (params.image) {
+          content.push({ type: 'image_url', image_url: params.image })
+        }
+
+        const requestData = {
+          model: params.model,
+          messages: [{ role: 'user', content }],
+          stream: false
+        }
+
+        const response = await generateImage(requestData, {
+          requestType: 'json',
+          endpoint: '/chat/completions'
+        })
+
+        console.log('Chat API Response:', response)
+
+        // Parse Gemini response | 解析 Gemini 响应
+        // Gemini 格式: choices[0].message.images[{type: "image_url", image_url: {url: "data:image/jpeg;base64,..."}}]
+        let imageUrl = null
+
+        if (response.choices?.[0]?.message?.images && response.choices[0].message.images.length > 0) {
+          // Gemini 格式：images 数组
+          imageUrl = response.choices[0].message.images[0]?.image_url?.url
+        } else if (response.choices?.[0]?.message?.content) {
+          // 其他聊天模型可能直接返回 URL 在 content 中
+          imageUrl = response.choices[0].message.content
+        } else if (response.data?.[0]?.url) {
+          // 标准图片 API 格式
+          imageUrl = response.data[0].url
+        }
+
+        console.log('Parsed imageUrl:', imageUrl)
+
+        if (!imageUrl) {
+          throw new Error('未能从响应中解析出图片 URL')
+        }
+
+        const generatedImages = [{ url: imageUrl, revisedPrompt: '' }]
+
+        images.value = generatedImages
+        currentImage.value = generatedImages[0] || null
+        setSuccess()
+        return generatedImages
+      }
+
+      // Standard Images API | 标准图片 API
       const requestData = {
         model: params.model,
         prompt: params.prompt,
         size: params.size || modelConfig?.defaultParams?.size || '1024x1024',
-        // n: params.n || 1
       }
 
-      // Add reference image if provided | 添加参考图
       if (params.image) {
         requestData.image = params.image
       }
 
-      // Call API | 调用 API
       const response = await generateImage(requestData, {
         requestType: 'json',
         endpoint: modelConfig?.endpoint || '/images/generations'
       })
 
-      // Parse response (OpenAI format) | 解析响应
       const data = response.data || response
       const generatedImages = (Array.isArray(data) ? data : [data]).map(item => ({
         url: item.url || item.b64_json || item,

@@ -57,6 +57,18 @@ export const IMAGE_MODELS = [
             quality: 'standard',
             style: 'vivid'
         }
+    },
+    {
+        label: 'Gemini 3 Pro Image Preview',
+        key: 'gemini-3-pro-image-preview',
+        endpoint: '/chat/completions',
+        useChatApi: true,
+        tips: '使用 Chat API 生成图片',
+        sizes: [],
+        defaultParams: {
+            quality: 'standard',
+            style: 'vivid'
+        }
     }
 ]
 
