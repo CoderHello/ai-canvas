@@ -337,7 +337,6 @@ const clearMask = () => {
 
 // Apply inpaint and create workflow | 应用重绘并创建工作流
 const applyInpaint = () => {
-  debugger
   const canvas = canvasRef.value
   if (!canvas || canvas.width === 0 || canvas.height === 0) {
     window.$message?.error('画布未初始化')
@@ -517,7 +516,7 @@ const handleImageGen = () => {
   // Create imageConfig node | 创建文生图配置节点
   const configNodeId = addNode('imageConfig', { x: nodeX + 600, y: nodeY }, {
     model: 'doubao-seedream-4-5-251128',
-    size: '1024x1024',
+    size: '2048x2048',
     label: '图生图'
   })
 
