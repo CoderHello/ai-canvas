@@ -516,7 +516,7 @@ const handleImageGen = () => {
   // Create imageConfig node | 创建文生图配置节点
   const configNodeId = addNode('imageConfig', { x: nodeX + 600, y: nodeY }, {
     model: 'doubao-seedream-4-5-251128',
-    size: '1024x1024',
+    size: '2048x2048',
     label: '图生图'
   })
 
